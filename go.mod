@@ -1,6 +1,9 @@
 module github.com/windkube/aws-metrics-exporter
 
-go 1.26.0
+// Patch version, not just 1.26: every govulncheck finding on this module has been
+// a standard library one, so the toolchain floor is the fix. Dropping back to a
+// bare "go 1.26" silently reintroduces them.
+go 1.26.8
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.47.0
