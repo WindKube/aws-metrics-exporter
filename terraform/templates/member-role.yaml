@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Read-only IAM role assumed by aws-metrics-exporter to inventory this account.
+
+Parameters:
+  RoleName:
+    Type: String
+    Description: Name of the role created in every member account.
+  HubRoleArn:
+    Type: String
+    Description: ARN of the role aws-metrics-exporter runs as.
+
+Resources:
+  ExporterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref RoleName
+      Description: Assumed by aws-metrics-exporter to read account inventory.
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Ref HubRoleArn
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: aws-metrics-exporter-read
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:ListUsers
+                  - iam:GetUser
+                  - iam:ListUserTags
+                  - iam:ListAccessKeys
+                  - iam:ListMFADevices
+                  - iam:ListAttachedUserPolicies
+                  - iam:ListUserPolicies
+                  - iam:ListGroupsForUser
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - elasticache:DescribeReplicationGroups
+                  - elasticache:ListTagsForResource
+                Resource: "*"
+              - Effect: Allow
+                Action: sts:GetCallerIdentity
+                Resource: "*"
+
+Outputs:
+  RoleArn:
+    Value: !GetAtt ExporterRole.Arn

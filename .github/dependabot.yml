@@ -1,0 +1,38 @@
+version: 2
+
+updates:
+  # Actions are pinned to a commit SHA, which means nothing updates them on its
+  # own. Without this the pins silently rot.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "deps"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "deps"
+    groups:
+      aws-sdk:
+        patterns: ["github.com/aws/aws-sdk-go-v2*"]
+      opentelemetry:
+        patterns: ["go.opentelemetry.io/*"]
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "deps"

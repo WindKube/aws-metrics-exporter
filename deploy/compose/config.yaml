@@ -1,0 +1,29 @@
+global:
+  scrape_interval: 1h
+  regions:
+    - eu-west-1
+  log:
+    level: debug
+    format: console
+  health:
+    address: ":8080"
+  temporal:
+    address: temporal:7233
+    namespace: default
+    task_queue: aws-metrics-exporter
+
+storage:
+  backend: elasticsearch
+  elasticsearch:
+    addresses:
+      - http://elasticsearch:9200
+    index_prefix: aws-inventory
+
+resources:
+  - aws_iam_user
+  - aws_elasticache_replication_group
+
+accounts:
+  - name: sandbox
+    id: "111111111111"
+    role_arn: arn:aws:iam::111111111111:role/aws-metrics-exporter

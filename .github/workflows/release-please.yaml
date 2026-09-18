@@ -1,0 +1,42 @@
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Maintain the release PR
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 10
+    permissions:
+      contents: write # tag the release and push the changelog commit
+      pull-requests: write # open and groom the release PR
+    outputs:
+      released: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
+  image:
+    name: Release image
+    needs: release-please
+    if: needs.release-please.outputs.released == 'true'
+    uses: ./.github/workflows/release-image.yaml # zizmor: ignore[self-repository]
+    permissions:
+      contents: read # the checkout of the release tag
+      packages: write # push the image and the manifest to GHCR
+      id-token: write # keyless cosign signing and the attestation
+      attestations: write # actions/attest writes the provenance
+      security-events: write # upload the Trivy SARIF to code scanning
+    with:
+      tag: ${{ needs.release-please.outputs.tag }}
