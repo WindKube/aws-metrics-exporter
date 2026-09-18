@@ -1,0 +1,47 @@
+version: 3
+
+env:
+  AWSME_CONFIG: configs/example.yaml
+
+tasks:
+  build: go build -o bin/aws-metrics-exporter .
+
+  test: go test ./... -race
+
+  lint: go vet ./...
+
+  fmt: gofmt -l -w .
+
+  temporal:
+    desc: |
+      Server:  localhost:7233
+      UI:      http://localhost:8233
+    cmds:
+      - temporal server start-dev
+
+  compose:up:
+    dir: deploy/compose
+    cmds:
+      - docker compose up -d elasticsearch kibana temporal
+
+  compose:down:
+    dir: deploy/compose
+    cmds:
+      - docker compose down -v
+
+  config:
+    cmds:
+      - go run . config validate --config {{.AWSME_CONFIG}}
+
+  scrape:
+    desc: 'Scrape one account directly: task scrape -- --account prod --resource aws_iam_user'
+    cmds:
+      - go run . scrape --config {{.AWSME_CONFIG}} {{.CLI_ARGS}}
+
+  worker:
+    cmds:
+      - go run . worker --config {{.AWSME_CONFIG}}
+
+  schedules:
+    cmds:
+      - go run . schedule list --config {{.AWSME_CONFIG}}

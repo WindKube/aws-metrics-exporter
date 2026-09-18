@@ -1,0 +1,80 @@
+name: Security
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  actions:
+    name: GitHub Actions audit (zizmor)
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 10
+    permissions:
+      contents: read # read the workflows being audited
+      actions: read # resolve the workflows' own action references
+      security-events: write # upload SARIF to code scanning so findings survive as alerts
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: zizmorcore/zizmor-action@70fb788f84895a7701f5643d103d587e460b5c99 # v0.6.3
+        with:
+          persona: pedantic
+          advanced-security: ${{ github.repository_owner == 'WindKube' }}
+          inputs: .github/workflows/
+
+  secrets:
+    name: Secret scan (TruffleHog)
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 15
+    permissions:
+      contents: read # the checkout
+    steps:
+      # TruffleHog diffs a commit range, so it needs history. Shallow clones make
+      # it silently scan almost nothing.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # --only-verified: an unverified hit is a string that looks like a key. Gating
+      # on those trains people to pass `--no-verify`, which is worse than no gate.
+      - uses: trufflesecurity/trufflehog@20652fbbdefffcdaa493a5bf57ab2ac6b1db715b # v3.97.1
+        with:
+          extra_args: --only-verified --results=verified
+
+  dependencies:
+    name: Dependency scan (Trivy)
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 15
+    permissions:
+      contents: read # the checkout
+      security-events: write # upload the Trivy SARIF to code scanning
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          ignore-unfixed: true
+
+      - name: Upload the scan to code scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@977e6ceaea7361825998245d787fa3b4d6b9e5df # codeql-bundle-v2.27.0
+        with:
+          sarif_file: trivy-fs.sarif
+          category: trivy-fs

@@ -1,0 +1,55 @@
+global:
+  scrape_interval: 1h
+  # Default region list for accounts that do not set their own. Only regional resource types are
+  # scraped per region; global ones such as aws_iam_user are scraped once per account.
+  regions:
+    - eu-west-1
+  log:
+    level: info
+    format: json
+  health:
+    address: ":8080"
+    probe_interval: 15s
+  temporal:
+    address: localhost:7233
+    namespace: default
+    task_queue: aws-metrics-exporter
+
+storage:
+  backend: elasticsearch
+  elasticsearch:
+    addresses:
+      - http://localhost:9200
+    index_prefix: aws-inventory
+    batch_size: 500
+    manage_index_template: true
+    # Credentials come from the environment, never from this file:
+    #   AWSME_STORAGE_ELASTICSEARCH_USERNAME
+    #   AWSME_STORAGE_ELASTICSEARCH_PASSWORD
+    #   AWSME_STORAGE_ELASTICSEARCH_API_KEY
+
+resources:
+  - aws_iam_user
+  - aws_elasticache_replication_group
+
+accounts:
+  - name: prod
+    id: "111111111111"
+    role_arn: arn:aws:iam::111111111111:role/aws-metrics-exporter
+
+  - name: multiregion
+    id: "222222222222"
+    role_arn: arn:aws:iam::222222222222:role/aws-metrics-exporter
+    regions:
+      - eu-west-1
+      - eu-central-1
+      - us-east-1
+
+  - name: sandbox
+    id: "333333333333"
+    role_arn: arn:aws:iam::333333333333:role/aws-metrics-exporter
+    regions:
+      - eu-west-1
+    resources:
+      - aws_iam_user
+    scrape_interval: 6h
