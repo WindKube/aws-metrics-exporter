@@ -148,6 +148,10 @@ jobs:
 
       - name: Fail on a fixable HIGH or CRITICAL
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          # Trivy resolves a remote index as linux/amd64 whatever the host, so on the arm64
+          # runner it finds no matching child and dies. The action has no platform input.
+          TRIVY_PLATFORM: ${{ matrix.platform }}
         with:
           scan-type: image
           image-ref: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
