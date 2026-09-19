@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2](https://github.com/WindKube/aws-metrics-exporter/compare/v0.1.1...v0.1.2) (2026-09-19)
+
+
+### Bug Fixes
+
+* derive the manifest list digest from its raw bytes ([12a507e](https://github.com/WindKube/aws-metrics-exporter/commit/12a507ea12a6b17db91625a6843c4593b320f679))
+* derive the manifest list digest from its raw bytes ([b3f6f3b](https://github.com/WindKube/aws-metrics-exporter/commit/b3f6f3b2243ffbff445c4936b5a7e0c7df32f044))
+
 ## [0.1.1](https://github.com/WindKube/aws-metrics-exporter/compare/v0.1.0...v0.1.1) (2026-09-19)
 
 
