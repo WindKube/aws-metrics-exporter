@@ -227,7 +227,18 @@ jobs:
             --annotation "index:org.opencontainers.image.licenses=Apache-2.0" \
             "${sources[@]}"
 
-          digest="$(docker buildx imagetools inspect "${IMAGE}:${VERSION}" --format '{{.Manifest.Digest}}')"
+          # An index digest is the sha256 of its own raw bytes. Deriving it that way avoids
+          # --format, which on the runner's buildx prints its default multi-line dump rather
+          # than the template and poisons GITHUB_OUTPUT.
+          docker buildx imagetools inspect "${IMAGE}:${VERSION}" --raw > "${RUNNER_TEMP}/index.json"
+
+          # An empty read hashes to a perfectly well-formed digest, which would then be signed.
+          if [[ ! -s "${RUNNER_TEMP}/index.json" ]]; then
+            echo "::error::could not read the manifest list for ${IMAGE}:${VERSION}"
+            exit 1
+          fi
+
+          digest="sha256:$(sha256sum "${RUNNER_TEMP}/index.json" | cut -d' ' -f1)"
           echo "digest=${digest}" >> "$GITHUB_OUTPUT"
           echo "Published ${IMAGE}:${VERSION} at ${digest}"
 
