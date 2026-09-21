@@ -56,7 +56,7 @@ Use it to check a new account's IAM permissions or to develop a collector withou
 		if scrapeDryRun {
 			store = countingStore{}
 		} else {
-			store, err = rt.newStore(ctx)
+			store, err = rt.newStore()
 			if err != nil {
 				return err
 			}

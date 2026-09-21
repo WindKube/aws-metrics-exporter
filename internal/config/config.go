@@ -55,13 +55,12 @@ type Storage struct {
 }
 
 type Elasticsearch struct {
-	Addresses           []string `mapstructure:"addresses"             json:"addresses"`
-	Username            string   `mapstructure:"username"             json:"-"`
-	Password            string   `mapstructure:"password"             json:"-"`
-	APIKey              string   `mapstructure:"api_key"              json:"-"`
-	IndexPrefix         string   `mapstructure:"index_prefix"         json:"index_prefix"`
-	BatchSize           int      `mapstructure:"batch_size"           json:"batch_size"`
-	ManageIndexTemplate bool     `mapstructure:"manage_index_template" json:"manage_index_template"`
+	Addresses   []string `mapstructure:"addresses"    json:"addresses"`
+	Username    string   `mapstructure:"username"     json:"-"`
+	Password    string   `mapstructure:"password"     json:"-"`
+	APIKey      string   `mapstructure:"api_key"      json:"-"`
+	IndexPrefix string   `mapstructure:"index_prefix" json:"index_prefix"`
+	BatchSize   int      `mapstructure:"batch_size"   json:"batch_size"`
 }
 
 // Account is embedded in Temporal Schedule action arguments, so its fields are part of the
@@ -102,7 +101,6 @@ func Load(path string, knownResources []string) (*Config, error) {
 	v.SetDefault("storage.backend", "elasticsearch")
 	v.SetDefault("storage.elasticsearch.index_prefix", "aws-inventory")
 	v.SetDefault("storage.elasticsearch.batch_size", 500)
-	v.SetDefault("storage.elasticsearch.manage_index_template", true)
 
 	v.SetEnvPrefix(EnvPrefix)
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))

@@ -30,7 +30,6 @@ storage:
       - http://localhost:9200
     index_prefix: aws-inventory
     batch_size: 500
-    manage_index_template: true
     # Credentials come from the environment, never from this file:
     #   AWSME_STORAGE_ELASTICSEARCH_USERNAME
     #   AWSME_STORAGE_ELASTICSEARCH_PASSWORD
