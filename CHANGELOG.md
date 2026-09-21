@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/WindKube/aws-metrics-exporter/compare/v0.1.2...v0.2.0) (2026-09-21)
+
+
+### Features
+
+* connect to Temporal over TLS ([3904ef2](https://github.com/WindKube/aws-metrics-exporter/commit/3904ef2281a716e5e33f5d933afd40393f782bd4))
+* connect to Temporal over TLS ([754cd6e](https://github.com/WindKube/aws-metrics-exporter/commit/754cd6e2c746034d5243938eed0af9e2b2f900b3))
+
 ## [0.1.2](https://github.com/WindKube/aws-metrics-exporter/compare/v0.1.1...v0.1.2) (2026-09-19)
 
 
