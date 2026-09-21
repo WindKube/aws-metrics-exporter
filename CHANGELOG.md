@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/WindKube/aws-metrics-exporter/compare/v0.3.0...v0.3.1) (2026-09-21)
+
+
+### Bug Fixes
+
+* probe the index pattern instead of the cluster root ([9dbf03a](https://github.com/WindKube/aws-metrics-exporter/commit/9dbf03ad421cd51efd947444f730e466d3cbf768))
+* probe the index pattern instead of the cluster root ([43031d9](https://github.com/WindKube/aws-metrics-exporter/commit/43031d98a751847d302290963a92feac9d0c9466))
+
 ## [0.3.0](https://github.com/WindKube/aws-metrics-exporter/compare/v0.2.0...v0.3.0) (2026-09-21)
 
 
