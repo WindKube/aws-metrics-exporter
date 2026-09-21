@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0](https://github.com/WindKube/aws-metrics-exporter/compare/v0.2.0...v0.3.0) (2026-09-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* storage.elasticsearch.manage_index_template is gone and the exporter no longer creates the index template. Create it before the first scrape, see deploy/elasticsearch/README.md.
+
+### Features
+
+* manage the Elasticsearch index template outside the application ([acd9dfb](https://github.com/WindKube/aws-metrics-exporter/commit/acd9dfb6ff9cdd2424d859a406c9a45b11a6d14b))
+
 ## [0.2.0](https://github.com/WindKube/aws-metrics-exporter/compare/v0.1.2...v0.2.0) (2026-09-21)
 
 
