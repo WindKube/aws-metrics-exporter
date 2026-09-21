@@ -7,7 +7,7 @@ resource "aws_iam_role" "hub" {
 data "aws_iam_policy_document" "assume_member_roles" {
   statement {
     effect    = "Allow"
-    actions   = ["sts:AssumeRole"]
+    actions   = ["sts:AssumeRole", "sts:TagSession"]
     resources = ["arn:aws:iam::*:role/${var.member_role_name}"]
   }
 }

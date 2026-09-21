@@ -2,9 +2,11 @@
 
 Creates the two halves of the exporter's AWS access:
 
-- **Hub role** (`hub.tf`) — the role `aws-metrics-exporter` runs as, allowed to `sts:AssumeRole` on
-  `arn:aws:iam::*:role/aws-metrics-exporter`. Its trust policy is passed in whole, so this module
-  stays agnostic about where the exporter runs.
+- **Hub role** (`hub.tf`) — the role `aws-metrics-exporter` runs as, allowed to `sts:AssumeRole`
+  and `sts:TagSession` on `arn:aws:iam::*:role/aws-metrics-exporter`. `sts:TagSession` is needed
+  because credentials such as EKS Pod Identity carry transitive session tags, which the exporter's
+  assume-role call then propagates into the member account. Its trust policy is passed in whole, so
+  this module stays agnostic about where the exporter runs.
 - **Member roles** (`stackset.tf`) — a service-managed CloudFormation stack set that creates the
   read-only `aws-metrics-exporter` role in every account of the targeted organizational units.
   `auto_deployment` is on, so accounts added to those OUs later get the role without a re-apply.
