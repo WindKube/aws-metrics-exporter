@@ -21,7 +21,9 @@ Resources:
           - Effect: Allow
             Principal:
               AWS: !Ref HubRoleArn
-            Action: sts:AssumeRole
+            Action:
+              - sts:AssumeRole
+              - sts:TagSession
       Policies:
         - PolicyName: aws-metrics-exporter-read
           PolicyDocument:
