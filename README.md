@@ -44,6 +44,10 @@ See [`configs/example.yaml`](configs/example.yaml). Credentials are never read f
 Any config key can be overridden with `AWSME_` plus the key path in upper case, for example
 `AWSME_GLOBAL_LOG_LEVEL=debug`.
 
+Set `global.temporal.tls.enabled` to connect over TLS; `cert_file` and `key_file` add a client
+certificate for mTLS, `ca_file` trusts a private CA instead of the system store and
+`insecure_skip_verify` drops server certificate verification entirely.
+
 Each account's `regions` list applies only to regional resource types; global ones are scraped once
 per account regardless. An account inherits `global.regions`, `resources` and
 `global.scrape_interval` unless it sets its own.

@@ -35,9 +35,18 @@ type Health struct {
 }
 
 type Temporal struct {
-	Address   string `mapstructure:"address"    json:"address"`
-	Namespace string `mapstructure:"namespace"  json:"namespace"`
-	TaskQueue string `mapstructure:"task_queue" json:"task_queue"`
+	Address   string      `mapstructure:"address"    json:"address"`
+	Namespace string      `mapstructure:"namespace"  json:"namespace"`
+	TaskQueue string      `mapstructure:"task_queue" json:"task_queue"`
+	TLS       TemporalTLS `mapstructure:"tls"        json:"tls"`
+}
+
+type TemporalTLS struct {
+	Enabled            bool   `mapstructure:"enabled"              json:"enabled"`
+	CertFile           string `mapstructure:"cert_file"            json:"cert_file"`
+	KeyFile            string `mapstructure:"key_file"             json:"key_file"`
+	CAFile             string `mapstructure:"ca_file"              json:"ca_file"`
+	InsecureSkipVerify bool   `mapstructure:"insecure_skip_verify" json:"insecure_skip_verify"`
 }
 
 type Storage struct {
