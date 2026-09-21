@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/WindKube/aws-metrics-exporter/compare/v0.3.1...v0.4.0) (2026-09-21)
+
+
+### Features
+
+* scrape ElastiCache cache clusters ([1319d03](https://github.com/WindKube/aws-metrics-exporter/commit/1319d036abd9bf6950f34ed9551864c07089af3c))
+* scrape ElastiCache cache clusters ([cd6ce94](https://github.com/WindKube/aws-metrics-exporter/commit/cd6ce94ca8e1c9a0a8cb17ec21cefeb3ac0e9a2d))
+
 ## [0.3.1](https://github.com/WindKube/aws-metrics-exporter/compare/v0.3.0...v0.3.1) (2026-09-21)
 
 
