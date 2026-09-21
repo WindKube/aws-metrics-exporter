@@ -114,23 +114,3 @@ func TestPingReportsAnUnhealthyCluster(t *testing.T) {
 
 	require.Error(t, client.Ping(context.Background()))
 }
-
-func TestEnsureIndexTemplateMapsTheAwsSubtreeAsFlattened(t *testing.T) {
-	var path string
-	var template map[string]any
-
-	client := newClient(t, func(w http.ResponseWriter, r *http.Request) {
-		path = r.URL.Path
-		_ = json.NewDecoder(r.Body).Decode(&template)
-		_, _ = w.Write([]byte(`{"acknowledged":true}`))
-	})
-
-	require.NoError(t, client.EnsureIndexTemplate(t.Context()))
-
-	assert.Equal(t, "/_index_template/aws-inventory", path)
-	assert.Equal(t, []any{"aws-inventory-*"}, template["index_patterns"])
-
-	properties := template["template"].(map[string]any)["mappings"].(map[string]any)["properties"].(map[string]any)
-	assert.Equal(t, "flattened", properties["aws"].(map[string]any)["type"])
-	assert.Equal(t, "date", properties["@timestamp"].(map[string]any)["type"])
-}

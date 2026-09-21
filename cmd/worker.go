@@ -30,7 +30,7 @@ var workerCmd = &cobra.Command{
 		}
 		defer rt.Close()
 
-		store, err := rt.newStore(ctx)
+		store, err := rt.newStore()
 		if err != nil {
 			return err
 		}

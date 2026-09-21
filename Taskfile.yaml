@@ -29,6 +29,11 @@ tasks:
     cmds:
       - docker compose down -v
 
+  es:template:
+    desc: Create the index template in the compose Elasticsearch
+    cmds:
+      - curl -fsS -XPUT http://localhost:9200/_index_template/aws-inventory -H 'Content-Type: application/json' --data-binary @deploy/elasticsearch/index-template.json
+
   config:
     cmds:
       - go run . config validate --config {{.AWSME_CONFIG}}

@@ -47,7 +47,6 @@ func TestLoadAppliesDefaults(t *testing.T) {
 	assert.Equal(t, "elasticsearch", cfg.Storage.Backend)
 	assert.Equal(t, "aws-inventory", cfg.Storage.Elasticsearch.IndexPrefix)
 	assert.Equal(t, 500, cfg.Storage.Elasticsearch.BatchSize)
-	assert.True(t, cfg.Storage.Elasticsearch.ManageIndexTemplate)
 }
 
 func TestLoadResolvesAccountDefaults(t *testing.T) {

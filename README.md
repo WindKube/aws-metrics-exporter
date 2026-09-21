@@ -29,6 +29,9 @@ duplicates and each daily index is a snapshot of the estate.
 }
 ```
 
+The index template in [`deploy/elasticsearch/`](deploy/elasticsearch/README.md) has to exist before
+the first scrape; the exporter never creates it and only needs write access to `<index_prefix>-*`.
+
 Adding a backend means implementing `storage.Store` in `internal/storage`.
 
 ## Configuration
@@ -67,6 +70,7 @@ and trigger are available per account without touching the others.
 
 ```bash
 task compose:up                                        # elasticsearch, kibana, temporal
+task es:template                                       # create the index template
 task config                                            # validate the config file
 task scrape -- --account prod --resource aws_iam_user  # one-shot, useful for checking IAM access
 task worker
@@ -79,9 +83,9 @@ up.
 
 ## AWS access
 
-The exporter assumes `role_arn` in each configured account. [`terraform/`](terraform/README.md)
-creates that role across an organization with a CloudFormation stack set, plus the hub role the
-exporter itself runs as.
+The exporter assumes `role_arn` in each configured account.
+[`terraform/aws/`](terraform/aws/README.md) creates that role across an organization with a
+CloudFormation stack set, plus the hub role the exporter itself runs as.
 
 ## Releases
 

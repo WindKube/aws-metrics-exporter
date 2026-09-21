@@ -58,17 +58,6 @@ func (r *runtime) Close() {
 	}
 }
 
-func (r *runtime) newStore(ctx context.Context) (*elasticsearch.Client, error) {
-	store, err := elasticsearch.New(r.cfg.Storage.Elasticsearch)
-	if err != nil {
-		return nil, err
-	}
-
-	if r.cfg.Storage.Elasticsearch.ManageIndexTemplate {
-		if err := store.EnsureIndexTemplate(ctx); err != nil {
-			return nil, err
-		}
-	}
-
-	return store, nil
+func (r *runtime) newStore() (*elasticsearch.Client, error) {
+	return elasticsearch.New(r.cfg.Storage.Elasticsearch)
 }
