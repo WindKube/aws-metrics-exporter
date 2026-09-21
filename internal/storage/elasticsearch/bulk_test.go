@@ -1,7 +1,6 @@
 package elasticsearch_test
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -106,11 +105,27 @@ func TestWriteIgnoresAnEmptyBatch(t *testing.T) {
 	require.NoError(t, client.Write(t.Context(), nil))
 }
 
-func TestPingReportsAnUnhealthyCluster(t *testing.T) {
-	client := newClient(t, func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		_, _ = w.Write([]byte(`{"error":"unavailable"}`))
+func TestPingChecksTheIndexPatternNotTheClusterRoot(t *testing.T) {
+	var method, path string
+
+	client := newClient(t, func(w http.ResponseWriter, r *http.Request) {
+		method, path = r.Method, r.URL.Path
+		w.WriteHeader(http.StatusOK)
 	})
 
-	require.Error(t, client.Ping(context.Background()))
+	require.NoError(t, client.Ping(t.Context()))
+
+	assert.Equal(t, http.MethodHead, method)
+	assert.Equal(t, "/aws-inventory-*", path)
+}
+
+func TestPingReportsAnUnhealthyCluster(t *testing.T) {
+	client := newClient(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	err := client.Ping(t.Context())
+
+	require.Error(t, err)
+	assert.Equal(t, "elasticsearch: 403 Forbidden", err.Error())
 }

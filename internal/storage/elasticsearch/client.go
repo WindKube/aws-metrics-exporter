@@ -1,6 +1,7 @@
 package elasticsearch
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -33,8 +34,15 @@ func New(cfg config.Elasticsearch) (*Client, error) {
 	return &Client{es: es, indexPrefix: cfg.IndexPrefix, batchSize: cfg.BatchSize}, nil
 }
 
+// Ping checks the index pattern the exporter writes into rather than the cluster root, which
+// answers 403 for an API key holding index privileges only. A pattern matching nothing is still a
+// 200, so a deployment is ready before its first scrape has created an index.
 func (c *Client) Ping(ctx context.Context) error {
-	res, err := c.es.Ping(c.es.Ping.WithContext(ctx))
+	res, err := c.es.Indices.Exists(
+		[]string{c.indexPrefix + "-*"},
+		c.es.Indices.Exists.WithContext(ctx),
+		c.es.Indices.Exists.WithAllowNoIndices(true),
+	)
 	if err != nil {
 		return err
 	}
@@ -55,5 +63,8 @@ func (c *Client) index(doc storage.Document) string {
 
 func responseError(status string, body io.Reader) error {
 	b, _ := io.ReadAll(io.LimitReader(body, 2048))
+	if len(bytes.TrimSpace(b)) == 0 {
+		return fmt.Errorf("elasticsearch: %s", status)
+	}
 	return fmt.Errorf("elasticsearch: %s: %s", status, b)
 }

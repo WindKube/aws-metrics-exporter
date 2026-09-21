@@ -4,8 +4,9 @@
 object as a single `flattened` field. Without it the first scrape of an IAM user with inline
 policies dynamically maps every policy statement key and the index hits the 1000 field limit.
 
-Create it before the first scrape. The exporter does not create or check it, so it needs no
-privileges beyond writing into `<index_prefix>-*`.
+Create it before the first scrape. The exporter does not create or check it, and needs no cluster
+privileges: `auto_configure` and `write` on `<index_prefix>-*` to index documents, plus
+`view_index_metadata` for the readiness probe.
 
 ```bash
 curl -fsS -XPUT "$ES_URL/_index_template/aws-inventory" \

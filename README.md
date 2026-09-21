@@ -79,7 +79,8 @@ curl -s localhost:8080/readyz
 
 `/readyz` and `/healthz` return 503 once two consecutive probes of the storage backend or Temporal
 fail, which takes the pod out of rotation in Kubernetes. `/livez` reports only that the process is
-up.
+up. The storage probe checks the `<index_prefix>-*` index pattern rather than the cluster root, so
+the Elasticsearch credentials need no cluster privileges.
 
 ## AWS access
 
