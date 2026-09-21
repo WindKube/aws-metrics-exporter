@@ -11,6 +11,7 @@ import (
 func Registry() *collector.Registry {
 	return collector.NewRegistry(
 		iamuser.New(),
-		elasticache.New(),
+		elasticache.NewReplicationGroup(),
+		elasticache.NewCluster(),
 	)
 }

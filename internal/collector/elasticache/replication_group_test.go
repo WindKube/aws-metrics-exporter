@@ -53,11 +53,11 @@ func group(id string) types.ReplicationGroup {
 	}
 }
 
-func collectorWith(api API) *Collector {
-	return &Collector{newAPI: func(aws.Config) API { return api }}
+func collectorWith(api ReplicationGroupAPI) *ReplicationGroupCollector {
+	return &ReplicationGroupCollector{newAPI: func(aws.Config) ReplicationGroupAPI { return api }}
 }
 
-func TestCollectWalksEveryPageAndAttachesTags(t *testing.T) {
+func TestReplicationGroupCollectWalksEveryPageAndAttachesTags(t *testing.T) {
 	api := &fakeElastiCache{pages: [][]types.ReplicationGroup{{group("sessions")}, {group("cache")}}}
 
 	var got []collector.Resource
@@ -80,7 +80,7 @@ func TestCollectWalksEveryPageAndAttachesTags(t *testing.T) {
 	assert.Len(t, decoded["Tags"], 1)
 }
 
-func TestCollectStopsWhenTaggingFails(t *testing.T) {
+func TestReplicationGroupCollectStopsWhenTaggingFails(t *testing.T) {
 	api := &fakeElastiCache{pages: [][]types.ReplicationGroup{{group("sessions")}}, tagsErr: errors.New("throttled")}
 
 	err := collectorWith(api).Collect(t.Context(), aws.Config{}, func(collector.Resource) error { return nil })
@@ -89,7 +89,7 @@ func TestCollectStopsWhenTaggingFails(t *testing.T) {
 	assert.Contains(t, err.Error(), "listing tags of elasticache replication group")
 }
 
-func TestScopeIsRegional(t *testing.T) {
-	assert.Equal(t, collector.ScopeRegional, New().Scope())
-	assert.Equal(t, ResourceType, New().Type())
+func TestReplicationGroupScopeIsRegional(t *testing.T) {
+	assert.Equal(t, collector.ScopeRegional, NewReplicationGroup().Scope())
+	assert.Equal(t, ResourceTypeReplicationGroup, NewReplicationGroup().Type())
 }

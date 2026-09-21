@@ -38,6 +38,7 @@ storage:
 resources:
   - aws_iam_user
   - aws_elasticache_replication_group
+  - aws_elasticache_cluster
 
 accounts:
   - name: prod
