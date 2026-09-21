@@ -11,10 +11,10 @@ import (
 	"github.com/windkube/aws-metrics-exporter/internal/collector"
 )
 
-const ResourceType = "aws_elasticache_replication_group"
+const ResourceTypeReplicationGroup = "aws_elasticache_replication_group"
 
-// API is the subset of the ElastiCache client this collector uses.
-type API interface {
+// ReplicationGroupAPI is the subset of the ElastiCache client this collector uses.
+type ReplicationGroupAPI interface {
 	DescribeReplicationGroups(context.Context, *elasticache.DescribeReplicationGroupsInput, ...func(*elasticache.Options)) (*elasticache.DescribeReplicationGroupsOutput, error)
 	ListTagsForResource(context.Context, *elasticache.ListTagsForResourceInput, ...func(*elasticache.Options)) (*elasticache.ListTagsForResourceOutput, error)
 }
@@ -24,18 +24,18 @@ type ReplicationGroup struct {
 	Tags []types.Tag `json:"Tags"`
 }
 
-type Collector struct {
-	newAPI func(aws.Config) API
+type ReplicationGroupCollector struct {
+	newAPI func(aws.Config) ReplicationGroupAPI
 }
 
-func New() *Collector {
-	return &Collector{newAPI: func(cfg aws.Config) API { return elasticache.NewFromConfig(cfg) }}
+func NewReplicationGroup() *ReplicationGroupCollector {
+	return &ReplicationGroupCollector{newAPI: func(cfg aws.Config) ReplicationGroupAPI { return elasticache.NewFromConfig(cfg) }}
 }
 
-func (c *Collector) Type() string           { return ResourceType }
-func (c *Collector) Scope() collector.Scope { return collector.ScopeRegional }
+func (c *ReplicationGroupCollector) Type() string           { return ResourceTypeReplicationGroup }
+func (c *ReplicationGroupCollector) Scope() collector.Scope { return collector.ScopeRegional }
 
-func (c *Collector) Collect(ctx context.Context, cfg aws.Config, emit collector.EmitFunc) error {
+func (c *ReplicationGroupCollector) Collect(ctx context.Context, cfg aws.Config, emit collector.EmitFunc) error {
 	api := c.newAPI(cfg)
 
 	pages := elasticache.NewDescribeReplicationGroupsPaginator(api, &elasticache.DescribeReplicationGroupsInput{})

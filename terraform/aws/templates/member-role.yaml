@@ -43,6 +43,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - elasticache:DescribeReplicationGroups
+                  - elasticache:DescribeCacheClusters
                   - elasticache:ListTagsForResource
                 Resource: "*"
               - Effect: Allow

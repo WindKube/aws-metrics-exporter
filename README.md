@@ -13,6 +13,7 @@ unit.
 |---|---|---|
 | `aws_iam_user` | global, scraped once per account | `ListUsers` plus tags, access keys, MFA devices, attached and inline policies, groups |
 | `aws_elasticache_replication_group` | regional, scraped once per configured region | `DescribeReplicationGroups`, `ListTagsForResource` |
+| `aws_elasticache_cluster` | regional, scraped once per configured region | `DescribeCacheClusters` with node info, `ListTagsForResource` |
 
 ## Backends
 
