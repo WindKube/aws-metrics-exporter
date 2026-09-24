@@ -47,6 +47,11 @@ Resources:
                   - elasticache:ListTagsForResource
                 Resource: "*"
               - Effect: Allow
+                Action:
+                  - rds:DescribeDBInstances
+                  - rds:DescribeDBClusters
+                Resource: "*"
+              - Effect: Allow
                 Action: sts:GetCallerIdentity
                 Resource: "*"
 
