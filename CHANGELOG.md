@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/WindKube/aws-metrics-exporter/compare/v0.4.0...v0.5.0) (2026-09-24)
+
+
+### Features
+
+* scrape RDS instances and clusters ([768d4ce](https://github.com/WindKube/aws-metrics-exporter/commit/768d4ce6b382c3272ecee924d4a60fd690c5f356))
+* scrape RDS instances and clusters ([94a3629](https://github.com/WindKube/aws-metrics-exporter/commit/94a36298a8ed51000776508539782e1302e82962))
+
 ## [0.4.0](https://github.com/WindKube/aws-metrics-exporter/compare/v0.3.1...v0.4.0) (2026-09-21)
 
 
