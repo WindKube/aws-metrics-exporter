@@ -6,6 +6,7 @@ import (
 	"github.com/windkube/aws-metrics-exporter/internal/collector"
 	"github.com/windkube/aws-metrics-exporter/internal/collector/elasticache"
 	"github.com/windkube/aws-metrics-exporter/internal/collector/iamuser"
+	"github.com/windkube/aws-metrics-exporter/internal/collector/rds"
 )
 
 func Registry() *collector.Registry {
@@ -13,5 +14,7 @@ func Registry() *collector.Registry {
 		iamuser.New(),
 		elasticache.NewReplicationGroup(),
 		elasticache.NewCluster(),
+		rds.NewInstance(),
+		rds.NewCluster(),
 	)
 }
