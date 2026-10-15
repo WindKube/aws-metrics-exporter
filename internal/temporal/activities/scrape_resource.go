@@ -3,6 +3,7 @@ package activities
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/aws/smithy-go"
@@ -13,7 +14,20 @@ import (
 	"github.com/windkube/aws-metrics-exporter/internal/scraper"
 )
 
-const ScrapeResourceName = "aws.ScrapeResource"
+// ScrapeActivityName registers the scrape activity once per resource type, so the Temporal UI shows
+// what each activity collects: aws_ecs_cluster becomes GetEcsClusters.
+func ScrapeActivityName(resourceType string) string {
+	var b strings.Builder
+	b.WriteString("Get")
+	for _, part := range strings.Split(strings.TrimPrefix(resourceType, "aws_"), "_") {
+		if part == "" {
+			continue
+		}
+		b.WriteString(strings.ToUpper(part[:1]) + part[1:])
+	}
+	b.WriteString("s")
+	return b.String()
+}
 
 const (
 	// ErrTypePermission marks failures a retry cannot fix, so Temporal stops immediately instead

@@ -10,7 +10,7 @@ import (
 	"github.com/windkube/aws-metrics-exporter/internal/collector"
 )
 
-const ResourceTypeInstance = "aws_db_instance"
+const ResourceTypeInstance = "aws_rds_instance"
 
 // InstanceAPI is the subset of the RDS client this collector uses.
 type InstanceAPI interface {

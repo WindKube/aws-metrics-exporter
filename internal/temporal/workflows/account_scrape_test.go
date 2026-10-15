@@ -86,12 +86,14 @@ func newEnv(t *testing.T) *testsuite.TestWorkflowEnvironment {
 	env.RegisterWorkflowWithOptions(workflows.AccountScrape, sdkworkflow.RegisterOptions{
 		Name: workflows.AccountScrapeName,
 	})
-	env.RegisterActivityWithOptions(
-		func(context.Context, activities.ScrapeInput) (activities.ScrapeOutput, error) {
-			return activities.ScrapeOutput{}, nil
-		},
-		sdkactivity.RegisterOptions{Name: activities.ScrapeResourceName},
-	)
+	for _, resourceType := range registry().Types() {
+		env.RegisterActivityWithOptions(
+			func(context.Context, activities.ScrapeInput) (activities.ScrapeOutput, error) {
+				return activities.ScrapeOutput{}, nil
+			},
+			sdkactivity.RegisterOptions{Name: activities.ScrapeActivityName(resourceType)},
+		)
+	}
 
 	return env
 }
@@ -107,8 +109,10 @@ func input(t *testing.T) workflows.AccountScrapeInput {
 
 func TestAccountScrapeRunsOneActivityPerTarget(t *testing.T) {
 	env := newEnv(t)
-	env.OnActivity(activities.ScrapeResourceName, mock.Anything, mock.Anything).
-		Return(activities.ScrapeOutput{Count: 7}, nil).Times(3)
+	env.OnActivity("GetIamUsers", mock.Anything, mock.Anything).
+		Return(activities.ScrapeOutput{Count: 7}, nil).Times(1)
+	env.OnActivity("GetElasticacheReplicationGroups", mock.Anything, mock.Anything).
+		Return(activities.ScrapeOutput{Count: 7}, nil).Times(2)
 
 	env.ExecuteWorkflow(workflows.AccountScrapeName, input(t))
 
@@ -126,10 +130,12 @@ func TestAccountScrapeRunsOneActivityPerTarget(t *testing.T) {
 
 func TestAccountScrapeSucceedsWhenOnlySomeTargetsFail(t *testing.T) {
 	env := newEnv(t)
-	env.OnActivity(activities.ScrapeResourceName, mock.Anything, mock.MatchedBy(
+	env.OnActivity("GetElasticacheReplicationGroups", mock.Anything, mock.MatchedBy(
 		func(in activities.ScrapeInput) bool { return in.Region == "eu-central-1" },
 	)).Return(activities.ScrapeOutput{}, errors.New("region unreachable"))
-	env.OnActivity(activities.ScrapeResourceName, mock.Anything, mock.Anything).
+	env.OnActivity("GetElasticacheReplicationGroups", mock.Anything, mock.Anything).
+		Return(activities.ScrapeOutput{Count: 4}, nil)
+	env.OnActivity("GetIamUsers", mock.Anything, mock.Anything).
 		Return(activities.ScrapeOutput{Count: 4}, nil)
 
 	env.ExecuteWorkflow(workflows.AccountScrapeName, input(t))
@@ -154,8 +160,10 @@ func TestAccountScrapeSucceedsWhenOnlySomeTargetsFail(t *testing.T) {
 
 func TestAccountScrapeFailsWhenEveryTargetFails(t *testing.T) {
 	env := newEnv(t)
-	env.OnActivity(activities.ScrapeResourceName, mock.Anything, mock.Anything).
-		Return(activities.ScrapeOutput{}, errors.New("role not assumable"))
+	for _, name := range []string{"GetIamUsers", "GetElasticacheReplicationGroups"} {
+		env.OnActivity(name, mock.Anything, mock.Anything).
+			Return(activities.ScrapeOutput{}, errors.New("role not assumable"))
+	}
 
 	env.ExecuteWorkflow(workflows.AccountScrapeName, input(t))
 
