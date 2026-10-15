@@ -16,6 +16,10 @@ unit.
 | `aws_elasticache_cluster` | regional, scraped once per configured region | `DescribeCacheClusters` with node info, `ListTagsForResource` |
 | `aws_db_instance` | regional, scraped once per configured region | `DescribeDBInstances` |
 | `aws_rds_cluster` | regional, scraped once per configured region | `DescribeDBClusters` |
+| `aws_ecs_cluster` | regional, scraped once per configured region | `ListClusters`, `DescribeClusters` with tags, settings, configurations and statistics |
+| `aws_ecs_service` | regional, scraped once per configured region | `ListClusters`, `ListServices`, `DescribeServices` with tags |
+| `aws_ecs_task_definition` | regional, scraped once per configured region, `ACTIVE` revisions only | `ListTaskDefinitions`, `DescribeTaskDefinition` with tags |
+| `aws_ecs_task` | regional, scraped once per configured region, tasks with desired status `RUNNING` | `ListClusters`, `ListTasks`, `DescribeTasks` with tags |
 
 ## Backends
 

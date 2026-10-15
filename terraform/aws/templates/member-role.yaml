@@ -52,6 +52,17 @@ Resources:
                   - rds:DescribeDBClusters
                 Resource: "*"
               - Effect: Allow
+                Action:
+                  - ecs:ListClusters
+                  - ecs:DescribeClusters
+                  - ecs:ListServices
+                  - ecs:DescribeServices
+                  - ecs:ListTaskDefinitions
+                  - ecs:DescribeTaskDefinition
+                  - ecs:ListTasks
+                  - ecs:DescribeTasks
+                Resource: "*"
+              - Effect: Allow
                 Action: sts:GetCallerIdentity
                 Resource: "*"
 
