@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.0](https://github.com/WindKube/aws-metrics-exporter/compare/v0.5.0...v0.6.0) (2026-10-15)
+
+
+### Features
+
+* add support for scraping billing data ([8c0ab0f](https://github.com/WindKube/aws-metrics-exporter/commit/8c0ab0ff52cf2d05187769d36db76629d3aeb8a4))
+* add support for scraping billing data ([3f5224c](https://github.com/WindKube/aws-metrics-exporter/commit/3f5224cd090533a7a9a4674bdf0ce4ada6e34dc9))
+* add support for scraping ecs data ([bea5e6d](https://github.com/WindKube/aws-metrics-exporter/commit/bea5e6deca1517746b7c363cbe2c8c1ab871cb59))
+* add support for scraping ecs data ([e9eb2a7](https://github.com/WindKube/aws-metrics-exporter/commit/e9eb2a78ae6972e00db60b646625b4af61234686))
+
+
+### Bug Fixes
+
+* update dependencies ([00bc7b9](https://github.com/WindKube/aws-metrics-exporter/commit/00bc7b98f24beb2eafbda985100f34d09c7ac0da))
+
 ## [0.5.0](https://github.com/WindKube/aws-metrics-exporter/compare/v0.4.0...v0.5.0) (2026-09-24)
 
 
