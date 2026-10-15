@@ -9,6 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.47.3
 	github.com/aws/aws-sdk-go-v2/config v1.33.5
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.5
+	github.com/aws/aws-sdk-go-v2/service/costexplorer v1.74.1
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.100.3
 	github.com/aws/aws-sdk-go-v2/service/elasticache v1.61.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.64.0

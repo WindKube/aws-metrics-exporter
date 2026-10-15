@@ -12,16 +12,22 @@ import (
 	"go.temporal.io/sdk/temporal"
 
 	"github.com/windkube/aws-metrics-exporter/internal/collector"
+	"github.com/windkube/aws-metrics-exporter/internal/collector/billing"
 	"github.com/windkube/aws-metrics-exporter/internal/config"
 	"github.com/windkube/aws-metrics-exporter/internal/temporal/workflows"
 )
 
-// IDPrefix scopes the schedules this reconciler owns; anything else in the namespace is left alone.
-const IDPrefix = "ame-acct-"
+// IDPrefix and BillingIDPrefix scope the schedules this reconciler owns; anything else in the
+// namespace is left alone.
+const (
+	IDPrefix        = "ame-acct-"
+	BillingIDPrefix = "ame-billing-"
+)
 
 const catchupWindow = time.Hour
 
-func ID(account string) string { return IDPrefix + account }
+func ID(account string) string        { return IDPrefix + account }
+func BillingID(account string) string { return BillingIDPrefix + account }
 
 type Reconciler struct {
 	client    client.Client
@@ -38,12 +44,37 @@ type Change struct {
 	Action string
 }
 
-// Apply makes the namespace's schedules match cfg: one per account, orphans removed. It is
-// idempotent so several replicas can run it concurrently.
+type schedule struct {
+	workflowID string
+	every      time.Duration
+	input      workflows.AccountScrapeInput
+}
+
+// Apply makes the namespace's schedules match cfg: one per account plus one per account with
+// billing enabled, orphans removed. It is idempotent so several replicas can run it concurrently.
 func (r *Reconciler) Apply(ctx context.Context, cfg *config.Config) ([]Change, error) {
-	desired := make(map[string]config.Account, len(cfg.Accounts))
+	desired := make(map[string]schedule, len(cfg.Accounts))
 	for _, account := range cfg.Accounts {
-		desired[ID(account.Name)] = account
+		targets, err := workflows.TargetsFor(account, r.registry)
+		if err != nil {
+			return nil, fmt.Errorf("resolving targets for account %s: %w", account.Name, err)
+		}
+		desired[ID(account.Name)] = schedule{
+			workflowID: "ame-scrape-" + account.Name,
+			every:      account.ScrapeInterval,
+			input:      workflows.AccountScrapeInput{Account: account, Targets: targets},
+		}
+
+		if account.Billing.Enabled {
+			desired[BillingID(account.Name)] = schedule{
+				workflowID: "ame-billing-scrape-" + account.Name,
+				every:      account.Billing.ScrapeInterval,
+				input: workflows.AccountScrapeInput{
+					Account: account,
+					Targets: []workflows.Target{{ResourceType: billing.ResourceType, Region: collector.GlobalRegion}},
+				},
+			}
+		}
 	}
 
 	existing, err := r.list(ctx)
@@ -53,12 +84,12 @@ func (r *Reconciler) Apply(ctx context.Context, cfg *config.Config) ([]Change, e
 
 	var changes []Change
 
-	for id, account := range desired {
+	for id, s := range desired {
 		action := "updated"
 		if _, ok := existing[id]; !ok {
 			action = "created"
 		}
-		if err := r.upsert(ctx, id, account); err != nil {
+		if err := r.upsert(ctx, id, s); err != nil {
 			return changes, err
 		}
 		changes = append(changes, Change{ID: id, Action: action})
@@ -89,7 +120,7 @@ func (r *Reconciler) list(ctx context.Context) (map[string]struct{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		if strings.HasPrefix(entry.ID, IDPrefix) {
+		if strings.HasPrefix(entry.ID, IDPrefix) || strings.HasPrefix(entry.ID, BillingIDPrefix) {
 			ids[entry.ID] = struct{}{}
 		}
 	}
@@ -97,26 +128,18 @@ func (r *Reconciler) list(ctx context.Context) (map[string]struct{}, error) {
 	return ids, nil
 }
 
-func (r *Reconciler) upsert(ctx context.Context, id string, account config.Account) error {
-	targets, err := workflows.TargetsFor(account, r.registry)
-	if err != nil {
-		return fmt.Errorf("resolving targets for account %s: %w", account.Name, err)
-	}
-
+func (r *Reconciler) upsert(ctx context.Context, id string, s schedule) error {
 	spec := client.ScheduleSpec{
-		Intervals: []client.ScheduleIntervalSpec{{Every: account.ScrapeInterval}},
+		Intervals: []client.ScheduleIntervalSpec{{Every: s.every}},
 	}
 	action := &client.ScheduleWorkflowAction{
-		ID:        "ame-scrape-" + account.Name,
+		ID:        s.workflowID,
 		Workflow:  workflows.AccountScrapeName,
 		TaskQueue: r.taskQueue,
-		Args: []any{workflows.AccountScrapeInput{
-			Account: account,
-			Targets: targets,
-		}},
+		Args:      []any{s.input},
 	}
 
-	_, err = r.client.ScheduleClient().Create(ctx, client.ScheduleOptions{
+	_, err := r.client.ScheduleClient().Create(ctx, client.ScheduleOptions{
 		ID:            id,
 		Spec:          spec,
 		Action:        action,

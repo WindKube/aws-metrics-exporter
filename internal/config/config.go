@@ -73,7 +73,16 @@ type Account struct {
 	Regions        []string      `mapstructure:"regions"         json:"regions"`
 	Resources      []string      `mapstructure:"resources"       json:"resources"`
 	ScrapeInterval time.Duration `mapstructure:"scrape_interval" json:"scrape_interval"`
+	Billing        Billing       `mapstructure:"billing"         json:"billing"`
 }
+
+// Billing runs on its own schedule because Cost Explorer charges per request.
+type Billing struct {
+	Enabled        bool          `mapstructure:"enabled"         json:"enabled"`
+	ScrapeInterval time.Duration `mapstructure:"scrape_interval" json:"scrape_interval"`
+}
+
+const DefaultBillingScrapeInterval = 12 * time.Hour
 
 func (c *Config) Account(name string) (Account, bool) {
 	for _, a := range c.Accounts {
@@ -147,6 +156,9 @@ func (c *Config) resolve() {
 		}
 		if a.ScrapeInterval == 0 {
 			a.ScrapeInterval = c.Global.ScrapeInterval
+		}
+		if a.Billing.ScrapeInterval == 0 {
+			a.Billing.ScrapeInterval = DefaultBillingScrapeInterval
 		}
 	}
 }

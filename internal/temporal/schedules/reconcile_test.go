@@ -152,6 +152,62 @@ func TestApplyDeletesSchedulesForRemovedAccounts(t *testing.T) {
 	}, changes)
 }
 
+func TestApplyCreatesABillingScheduleWhenEnabled(t *testing.T) {
+	c, scheduleClient := newClient(t)
+
+	created := map[string]client.ScheduleOptions{}
+	scheduleClient.On("Create", mock.Anything, mock.Anything).
+		Run(func(args mock.Arguments) {
+			opts := args.Get(1).(client.ScheduleOptions)
+			created[opts.ID] = opts
+		}).
+		Return(mocks.NewScheduleHandle(t), nil).Twice()
+
+	prod := account("prod")
+	prod.Billing = config.Billing{Enabled: true, ScrapeInterval: 12 * time.Hour}
+
+	changes, err := schedules.NewReconciler(c, registry(), "aws-metrics-exporter").
+		Apply(t.Context(), configWith(prod))
+	require.NoError(t, err)
+
+	assert.ElementsMatch(t, []schedules.Change{
+		{ID: "ame-acct-prod", Action: "created"},
+		{ID: "ame-billing-prod", Action: "created"},
+	}, changes)
+
+	opts := created["ame-billing-prod"]
+	assert.Equal(t, []client.ScheduleIntervalSpec{{Every: 12 * time.Hour}}, opts.Spec.Intervals)
+
+	action := opts.Action.(*client.ScheduleWorkflowAction)
+	assert.Equal(t, "ame-billing-scrape-prod", action.ID)
+	assert.Equal(t, []workflows.Target{{ResourceType: "aws_billing", Region: collector.GlobalRegion}},
+		action.Args[0].(workflows.AccountScrapeInput).Targets)
+}
+
+func TestApplyDeletesTheBillingScheduleWhenDisabled(t *testing.T) {
+	c, scheduleClient := newClient(t, "ame-acct-prod", "ame-billing-prod")
+
+	scheduleClient.On("Create", mock.Anything, mock.Anything).
+		Return(nil, temporal.ErrScheduleAlreadyRunning).Once()
+
+	prod := mocks.NewScheduleHandle(t)
+	prod.On("Update", mock.Anything, mock.Anything).Return(nil).Once()
+	scheduleClient.On("GetHandle", mock.Anything, "ame-acct-prod").Return(prod).Once()
+
+	billing := mocks.NewScheduleHandle(t)
+	billing.On("Delete", mock.Anything).Return(nil).Once()
+	scheduleClient.On("GetHandle", mock.Anything, "ame-billing-prod").Return(billing).Once()
+
+	changes, err := schedules.NewReconciler(c, registry(), "aws-metrics-exporter").
+		Apply(t.Context(), configWith(account("prod")))
+	require.NoError(t, err)
+
+	assert.ElementsMatch(t, []schedules.Change{
+		{ID: "ame-acct-prod", Action: "updated"},
+		{ID: "ame-billing-prod", Action: "deleted"},
+	}, changes)
+}
+
 func TestApplyLeavesForeignSchedulesAlone(t *testing.T) {
 	c, scheduleClient := newClient(t, "some-other-teams-schedule")
 

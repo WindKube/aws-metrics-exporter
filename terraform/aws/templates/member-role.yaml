@@ -63,6 +63,9 @@ Resources:
                   - ecs:DescribeTasks
                 Resource: "*"
               - Effect: Allow
+                Action: ce:GetCostAndUsage
+                Resource: "*"
+              - Effect: Allow
                 Action: sts:GetCallerIdentity
                 Resource: "*"
 

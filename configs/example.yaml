@@ -50,6 +50,9 @@ accounts:
   - name: prod
     id: "111111111111"
     role_arn: arn:aws:iam::111111111111:role/aws-metrics-exporter
+    billing:
+      enabled: true
+      scrape_interval: 12h
 
   - name: multiregion
     id: "222222222222"

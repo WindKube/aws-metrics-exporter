@@ -65,6 +65,8 @@ func TestLoadResolvesAccountDefaults(t *testing.T) {
 	assert.Equal(t, []string{"eu-west-1"}, prod.Regions)
 	assert.Equal(t, []string{"aws_iam_user"}, prod.Resources)
 	assert.Equal(t, time.Hour, prod.ScrapeInterval)
+	assert.False(t, prod.Billing.Enabled)
+	assert.Equal(t, 12*time.Hour, prod.Billing.ScrapeInterval)
 
 	sandbox, ok := cfg.Account("sandbox")
 	require.True(t, ok)
@@ -97,6 +99,36 @@ accounts:
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), `unknown resource type "aws_unicorn"`)
+}
+
+func TestLoadReadsBillingSettings(t *testing.T) {
+	cfg, err := config.Load(write(t, minimal+`
+    billing:
+      enabled: true
+      scrape_interval: 24h
+`), known)
+	require.NoError(t, err)
+
+	prod, ok := cfg.Account("prod")
+	require.True(t, ok)
+	assert.True(t, prod.Billing.Enabled)
+	assert.Equal(t, 24*time.Hour, prod.Billing.ScrapeInterval)
+}
+
+func TestLoadRejectsBillingInResources(t *testing.T) {
+	_, err := config.Load(write(t, `
+storage:
+  elasticsearch:
+    addresses: ["http://localhost:9200"]
+resources: [aws_iam_user, aws_billing]
+accounts:
+  - name: prod
+    id: "111111111111"
+    role_arn: arn:aws:iam::111111111111:role/aws-metrics-exporter
+`), append(known, "aws_billing"))
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "accounts.prod.billing.enabled")
 }
 
 func TestValidateReportsEveryProblemAtOnce(t *testing.T) {
