@@ -4,6 +4,7 @@ package all
 
 import (
 	"github.com/windkube/aws-metrics-exporter/internal/collector"
+	"github.com/windkube/aws-metrics-exporter/internal/collector/billing"
 	"github.com/windkube/aws-metrics-exporter/internal/collector/ecs"
 	"github.com/windkube/aws-metrics-exporter/internal/collector/elasticache"
 	"github.com/windkube/aws-metrics-exporter/internal/collector/iamuser"
@@ -21,5 +22,6 @@ func Registry() *collector.Registry {
 		ecs.NewService(),
 		ecs.NewTaskDefinition(),
 		ecs.NewTask(),
+		billing.New(),
 	)
 }

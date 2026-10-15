@@ -20,6 +20,7 @@ unit.
 | `aws_ecs_service` | regional, scraped once per configured region | `ListClusters`, `ListServices`, `DescribeServices` with tags |
 | `aws_ecs_task_definition` | regional, scraped once per configured region, `ACTIVE` revisions only | `ListTaskDefinitions`, `DescribeTaskDefinition` with tags |
 | `aws_ecs_task` | regional, scraped once per configured region, tasks with desired status `RUNNING` | `ListClusters`, `ListTasks`, `DescribeTasks` with tags |
+| `aws_billing` | global, on its own schedule via `accounts[].billing` | `GetCostAndUsage` twice: month-to-date cost per service and the account total |
 
 ## Backends
 
@@ -61,6 +62,12 @@ certificate for mTLS, `ca_file` trusts a private CA instead of the system store 
 Each account's `regions` list applies only to regional resource types; global ones are scraped once
 per account regardless. An account inherits `global.regions`, `resources` and
 `global.scrape_interval` unless it sets its own.
+
+Billing is opt-in per account with `billing.enabled: true` and runs on its own schedule,
+`billing.scrape_interval` (default `12h`), because Cost Explorer charges $0.01 per request and only
+refreshes its data a few times a day. Do not add `aws_billing` to `resources`. Each account reads
+only its own costs, so Cost Explorer has to be enabled and, for member accounts, the management
+account has to allow linked-account access to Cost Explorer in its billing preferences.
 
 ## Running
 

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"github.com/windkube/aws-metrics-exporter/internal/collector/billing"
 )
 
 func (c *Config) Validate(knownResources []string) error {
@@ -48,7 +50,15 @@ func (c *Config) Validate(knownResources []string) error {
 		if len(a.Resources) == 0 {
 			errs = append(errs, fmt.Errorf("%s.resources: is empty and no global resources are configured", where))
 		}
+		if a.Billing.Enabled && a.Billing.ScrapeInterval <= 0 {
+			errs = append(errs, fmt.Errorf("%s.billing.scrape_interval: must be greater than zero", where))
+		}
 		for _, r := range a.Resources {
+			if r == billing.ResourceType {
+				errs = append(errs, fmt.Errorf("%s.resources: %q runs on its own schedule, set %s.billing.enabled instead",
+					where, r, where))
+				continue
+			}
 			if !slices.Contains(knownResources, r) {
 				errs = append(errs, fmt.Errorf("%s.resources: unknown resource type %q, known types are %s",
 					where, r, strings.Join(knownResources, ", ")))
