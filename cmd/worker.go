@@ -48,7 +48,7 @@ var workerCmd = &cobra.Command{
 		}
 
 		s := scraper.New(factory, rt.registry, store, rt.cfg.Storage.Elasticsearch.BatchSize)
-		w := temporalclient.NewWorker(temporalClient, rt.cfg.Global.Temporal, activities.New(s))
+		w := temporalclient.NewWorker(temporalClient, rt.cfg.Global.Temporal, activities.New(s), rt.registry.Types())
 
 		if err = w.Start(); err != nil {
 			return err

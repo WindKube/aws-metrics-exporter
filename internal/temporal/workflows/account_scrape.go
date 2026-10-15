@@ -79,7 +79,7 @@ func AccountScrape(ctx workflow.Context, in AccountScrapeInput) (AccountScrapeRe
 
 	futures := make([]workflow.Future, 0, len(in.Targets))
 	for _, target := range in.Targets {
-		futures = append(futures, workflow.ExecuteActivity(ctx, activities.ScrapeResourceName, activities.ScrapeInput{
+		futures = append(futures, workflow.ExecuteActivity(ctx, activities.ScrapeActivityName(target.ResourceType), activities.ScrapeInput{
 			Account:      in.Account,
 			ResourceType: target.ResourceType,
 			Region:       target.Region,

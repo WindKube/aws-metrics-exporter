@@ -14,7 +14,7 @@ unit.
 | `aws_iam_user` | global, scraped once per account | `ListUsers` plus tags, access keys, MFA devices, attached and inline policies, groups |
 | `aws_elasticache_replication_group` | regional, scraped once per configured region | `DescribeReplicationGroups`, `ListTagsForResource` |
 | `aws_elasticache_cluster` | regional, scraped once per configured region | `DescribeCacheClusters` with node info, `ListTagsForResource` |
-| `aws_db_instance` | regional, scraped once per configured region | `DescribeDBInstances` |
+| `aws_rds_instance` | regional, scraped once per configured region | `DescribeDBInstances` |
 | `aws_rds_cluster` | regional, scraped once per configured region | `DescribeDBClusters` |
 | `aws_ecs_cluster` | regional, scraped once per configured region | `ListClusters`, `DescribeClusters` with tags, settings, configurations and statistics |
 | `aws_ecs_service` | regional, scraped once per configured region | `ListClusters`, `ListServices`, `DescribeServices` with tags |

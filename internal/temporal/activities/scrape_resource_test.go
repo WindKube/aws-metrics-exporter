@@ -57,7 +57,7 @@ func newEnv(t *testing.T, c collector.Collector) *testsuite.TestActivityEnvironm
 
 	acts := activities.New(scraper.New(stubFactory{}, collector.NewRegistry(c), nopStore{}, 2))
 	env.RegisterActivityWithOptions(acts.ScrapeResource, sdkactivity.RegisterOptions{
-		Name: activities.ScrapeResourceName,
+		Name: activities.ScrapeActivityName("fake"),
 	})
 
 	return env
@@ -82,7 +82,7 @@ func TestScrapeResourceHeartbeatsAfterEveryBatch(t *testing.T) {
 		heartbeats = append(heartbeats, count)
 	})
 
-	encoded, err := env.ExecuteActivity(activities.ScrapeResourceName, input())
+	encoded, err := env.ExecuteActivity(activities.ScrapeActivityName("fake"), input())
 	require.NoError(t, err)
 
 	var out activities.ScrapeOutput
@@ -101,7 +101,7 @@ func TestScrapeResourceMakesPermissionFailuresNonRetryable(t *testing.T) {
 		Message: "not authorized to perform iam:ListUsers",
 	}})
 
-	_, err := env.ExecuteActivity(activities.ScrapeResourceName, input())
+	_, err := env.ExecuteActivity(activities.ScrapeActivityName("fake"), input())
 	require.Error(t, err)
 
 	var appErr *temporal.ApplicationError
@@ -113,7 +113,7 @@ func TestScrapeResourceMakesPermissionFailuresNonRetryable(t *testing.T) {
 func TestScrapeResourceLeavesOtherFailuresRetryable(t *testing.T) {
 	env := newEnv(t, fakeCollector{err: &smithy.GenericAPIError{Code: "Throttling", Message: "rate exceeded"}})
 
-	_, err := env.ExecuteActivity(activities.ScrapeResourceName, input())
+	_, err := env.ExecuteActivity(activities.ScrapeActivityName("fake"), input())
 	require.Error(t, err)
 
 	var appErr *temporal.ApplicationError
@@ -132,7 +132,7 @@ func TestScrapeResourceFlattensNestedAwsErrors(t *testing.T) {
 
 	env := newEnv(t, fakeCollector{err: nested})
 
-	_, err := env.ExecuteActivity(activities.ScrapeResourceName, input())
+	_, err := env.ExecuteActivity(activities.ScrapeActivityName("fake"), input())
 	require.Error(t, err)
 
 	var appErr *temporal.ApplicationError
@@ -140,4 +140,10 @@ func TestScrapeResourceFlattensNestedAwsErrors(t *testing.T) {
 	assert.Nil(t, appErr.Unwrap(), "the failure must not carry the SDK's wrap chain")
 	assert.Contains(t, appErr.Error(), "listing iam users")
 	assert.Contains(t, appErr.Error(), "rate exceeded")
+}
+
+func TestScrapeActivityNameDescribesTheResourceType(t *testing.T) {
+	assert.Equal(t, "GetEcsClusters", activities.ScrapeActivityName("aws_ecs_cluster"))
+	assert.Equal(t, "GetIamUsers", activities.ScrapeActivityName("aws_iam_user"))
+	assert.Equal(t, "GetElasticacheReplicationGroups", activities.ScrapeActivityName("aws_elasticache_replication_group"))
 }
