@@ -4,6 +4,7 @@ package all
 
 import (
 	"github.com/windkube/aws-metrics-exporter/internal/collector"
+	"github.com/windkube/aws-metrics-exporter/internal/collector/ecs"
 	"github.com/windkube/aws-metrics-exporter/internal/collector/elasticache"
 	"github.com/windkube/aws-metrics-exporter/internal/collector/iamuser"
 	"github.com/windkube/aws-metrics-exporter/internal/collector/rds"
@@ -16,5 +17,9 @@ func Registry() *collector.Registry {
 		elasticache.NewCluster(),
 		rds.NewInstance(),
 		rds.NewCluster(),
+		ecs.NewCluster(),
+		ecs.NewService(),
+		ecs.NewTaskDefinition(),
+		ecs.NewTask(),
 	)
 }
