@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/golang:1.26.9 AS builder
+FROM public.ecr.aws/docker/library/golang:1.27.2 AS builder
 
 ARG VERSION=dev
 
